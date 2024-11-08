@@ -3,4 +3,5 @@
 interface CloudflareBindings {
 	DATABASE_URL: string;
 	DIRECT_URL: string;
+	JWT_SECRET: string;
 }
