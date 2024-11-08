@@ -16,11 +16,11 @@ app.get("/cruxx", async (c) => {
 });
 
 // Admin Routes
-app.get("/cruxx/users",async (c)=>{
+app.get("/cruxx/users", async (c) => {
   const prisma = getPrisma(c.env.DATABASE_URL);
   const users = await prisma.user.findMany();
-  return c.json({data : users});
-})
+  return c.json({ data: users });
+});
 
 // User routes
 app.get("/cruxx/users/:id", async (c) => {
@@ -39,12 +39,8 @@ app.get("/cruxx/users/:id", async (c) => {
   return c.json({ user }, { status: 200, statusText: "Ok" });
 });
 
-app.post(
-  "/cruxx/users",
-  zValidator("form",ZCreateUser),
-  async (c) => {
-    const {id,email,firstName,lastName,picture} = c.req.valid("form");
-
+app.post("/cruxx/users",zValidator("json",ZCreateUser) , async (c) => {
+  const { id, email, firstName, lastName, picture } = c.req.valid("json");
     const prisma = getPrisma(c.env.DATABASE_URL);
     let newUser, existingUser;
     try{
@@ -80,21 +76,27 @@ app.post(
   }
 );
 
-app.delete("/cruxx/users/:id",async (c)=>{
+app.delete("/cruxx/users/:id", async (c) => {
   const prisma = getPrisma(c.env.DATABASE_URL);
   const id = c.req.param("id");
   let user;
   try {
     user = await prisma.user.delete({
-      where : {
-        id
-      }
-    })
+      where: {
+        id,
+      },
+    });
   } catch (error) {
-      return c.json({error : "User with given id does not exists", message : "Invalid or incorrect user id"}, {status : 400});
+    return c.json(
+      {
+        error: "User with given id does not exists",
+        message: "Invalid or incorrect user id",
+      },
+      { status: 400 }
+    );
   }
-  return c.json({message : "User account deleted"})
-})
+  return c.json({ message: "User account deleted" });
+});
 
 export default app;
 

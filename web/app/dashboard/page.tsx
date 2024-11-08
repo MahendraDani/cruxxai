@@ -10,7 +10,31 @@ export default async function Page(){
   }
 
   const user = await getUser();
-  // api call to add user to database
+  
+  // TODO : Eliminate this, becuase this runs every time when /dashboard is rendered 
+  // check if user is already in db
+  const res = await fetch(`http://localhost:8787/cruxx/users/${user.id}`);
+  const response = await res.json();
+  if(!response.user){
+    // add user to database
+    const res = await fetch(`http://localhost:8787/cruxx/users`,{
+      method : "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body : JSON.stringify({
+        id : user.id,
+        email : user.email || "",
+        firstName : user.given_name || "",
+        lastName : user.family_name || "",
+        picture : user.picture || "",
+      }),
+
+    })
+    const response = await res.json();
+    console.log(response);
+  }
+
   return (
     <div>
       <p>You are authenticated</p>
