@@ -15,7 +15,24 @@ datasource db {
 }
 
 model User {
-  userId String @id @default(cuid())
-  email String
-  name String
+  id    String @id
+  email String?
+  firstName String? @map("first_name")
+  lastName String? @map("last_name")
+  picture String?
+  createdAt DateTime @map("created_at") 
+  updatedAt DateTime @updatedAt @map("updated_at")
+  apiKeys APIMapping?
+
+  @@map("users")
+}
+
+model APIMapping {
+  userId String @id
+  apiKey String
+  createdAt DateTime @map("created_at")
+  expiry DateTime @map("expire_at")
+  isActive Boolean @default(true) @map("is_active")
+  user User @relation(fields: [userId],references: [id], onDelete: Cascade)
+  @@map("api_mapping")
 }

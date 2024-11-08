@@ -1,20 +1,21 @@
 import {getKindeServerSession} from "@kinde-oss/kinde-auth-nextjs/server"
 import {LogoutLink} from "@kinde-oss/kinde-auth-nextjs/components"
+import { redirect } from "next/navigation";
 
 export default async function Page(){
   const {getUser,isAuthenticated} = getKindeServerSession();
   const isAuth = await isAuthenticated();
   if(!isAuth){
-    console.log("Not logged in");
+    redirect("/");
   }
 
   const user = await getUser();
-  console.log(user);
+  // api call to add user to database
   return (
     <div>
       <p>You are authenticated</p>
       <pre>{JSON.stringify(user,null,2)}</pre>
-      {isAuth && <LogoutLink>Logout</LogoutLink>}
+      {isAuth && <LogoutLink >Logout</LogoutLink>}
     </div>
   )
 }
