@@ -38,7 +38,7 @@ app.use("/cruxx/api/*",bearerAuth({
 }),)
 
 app.get("/", async (c) => {
-  return c.json({ message: "Hello World!" });
+  return c.json({ message: "Hello,World!" });
 });
 
 // Admin Routes
