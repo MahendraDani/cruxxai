@@ -22,17 +22,16 @@ model User {
   picture String?
   createdAt DateTime @map("created_at") 
   updatedAt DateTime @updatedAt @map("updated_at")
-  apiKeys APIMapping?
+  apiKeys Token?
 
   @@map("users")
 }
 
-model APIMapping {
+model Token {
   userId String @id
-  apiKey String
+  apiKey String @unique
   createdAt DateTime @map("created_at")
-  expiry DateTime @map("expire_at")
   isActive Boolean @default(true) @map("is_active")
   user User @relation(fields: [userId],references: [id], onDelete: Cascade)
-  @@map("api_mapping")
+  @@map("tokens")
 }

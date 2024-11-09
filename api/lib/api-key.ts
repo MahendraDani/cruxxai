@@ -6,7 +6,7 @@ export const generateAPIKey = async (userId : string, c : Context)=>{
   const prisma = getPrisma(c.env.DATABASE_URL);
 
   //check if user already has an API key if yes then give them that
-  const exists = await prisma.aPIMapping.findFirst({
+  const exists = await prisma.token.findFirst({
     where : {
       userId,
     }
@@ -23,13 +23,11 @@ export const generateAPIKey = async (userId : string, c : Context)=>{
   // add key to database
   let newKey;
   try {
-      newKey = await prisma.aPIMapping.create({
+      newKey = await prisma.token.create({
       data : {
         userId,
         apiKey,
         createdAt : new Date(),
-        //TODO : make expiry date optional
-        expiry : new Date(),
       }
     })
   } catch (error) {
@@ -44,7 +42,7 @@ export const validateKey = async (apiKey : string, c : Context)=>{
 
   let exists;
   try {
-    exists = await prisma.aPIMapping.findFirst({
+    exists = await prisma.token.findFirst({
       where : {
         apiKey,
       }

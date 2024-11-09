@@ -157,7 +157,7 @@ app.get(
 app.get("/cruxx/api/whoami",async c=>{
   const prisma = getPrisma(c.env.DATABASE_URL);
   const apiKey = c.req.header("Authorization")?.split(" ")[1];
-  const data = await prisma.aPIMapping.findFirst({
+  const data = await prisma.token.findFirst({
     where : {
       apiKey
     },
