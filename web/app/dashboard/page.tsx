@@ -1,6 +1,7 @@
 import {getKindeServerSession} from "@kinde-oss/kinde-auth-nextjs/server"
 import {LogoutLink} from "@kinde-oss/kinde-auth-nextjs/components"
 import { redirect } from "next/navigation";
+import { API_CONFIG } from "@/lib/config";
 
 export default async function Page(){
   const {getUser,isAuthenticated} = getKindeServerSession();
@@ -13,11 +14,11 @@ export default async function Page(){
   
   // TODO : Eliminate this, becuase this runs every time when /dashboard is rendered 
   // check if user is already in db
-  const res = await fetch(`http://localhost:8787/cruxx/users/${user.id}`);
+  const res = await fetch(`${API_CONFIG.BASE_API}/users/${user.id}`, {method : "GET"});
   const response = await res.json();
   if(!response.user){
     // add user to database
-    const res = await fetch(`http://localhost:8787/cruxx/users`,{
+    const res = await fetch(`${API_CONFIG.BASE_API}/users`,{
       method : "POST",
       headers: {
         'Content-Type': 'application/json'
@@ -38,7 +39,7 @@ export default async function Page(){
   return (
     <div>
       <p>You are authenticated</p>
-      <pre>{JSON.stringify(user,null,2)}</pre>
+      <pre>{JSON.stringify(response,null,2)}</pre>
       {isAuth && <LogoutLink >Logout</LogoutLink>}
     </div>
   )

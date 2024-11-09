@@ -37,7 +37,7 @@ app.use("/cruxx/api/*",bearerAuth({
   }
 }),)
 
-app.get("/cruxx", async (c) => {
+app.get("/", async (c) => {
   return c.json({ message: "Hello World!" });
 });
 
