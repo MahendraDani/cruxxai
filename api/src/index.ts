@@ -205,22 +205,6 @@ app.get(
   }
 );
 
-// app.get("/cruxx/summarize/all", zValidator("query",z.object({url : z.string()})),async c=>{
-//   const {url} = c.req.valid("query");
-//   let html;
-//   try {
-//     html = await getHTML(url);
-//   } catch (error) {
-//     console.log(error);
-//     return c.json({data: null, error: "Error fetching HTML from base URL"});
-//   }
-//   let refererLinks : TRefererLink[];
-//   refererLinks = scrapeHTML(html,url);
-//   const summary = await summarize(refererLinks[0].url,c.env);
-//   return c.json({summary});
-
-// })
-
 app.get("/cruxx/summarize/all", zValidator("query", z.object({ url: z.string() })), async c => {
   const { url } = c.req.valid("query");
   let html;
@@ -257,7 +241,7 @@ app.get("/cruxx/summarize/all", zValidator("query", z.object({ url: z.string() }
     // Filter out failed summaries and combine with URLs
     const results = refererLinks
       .map((link, index) => ({
-        url: link.url,
+        ...link,
         summary: summaries[index]
       }))
       .filter(result => result.summary !== null);
