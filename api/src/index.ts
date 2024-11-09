@@ -7,6 +7,8 @@ import { ZCreateUser } from "../lib/schema";
 import { Prisma } from "@prisma/client";
 import { bearerAuth } from "hono/bearer-auth";
 import { generateAPIKey, validateKey } from "../lib/api-key";
+import { getHTML, scrapeHTML } from "../lib/scrape";
+import { TRefererLink } from "../lib/types";
 // import {sign,encode,decode} from "hono/jwt"
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -173,7 +175,23 @@ app.get("/cruxx/api/whoami",async c=>{
   return c.json({data});
 })
 
+app.get("/cruxx/summarize", zValidator("query",z.object({url : z.string()})),async c=>{
+  const {url} = c.req.valid("query");
+  let html;
+  let links : TRefererLink[];
+  try {
+    html = await getHTML(url);
+  } catch (error) {
+    console.log("HTML Scrape Error",error);
+    return c.json({error,message : "Error scrapping HTML from URL"})
+  }
+  // console.log(html);
+
+  links = scrapeHTML(html,url)
+  return c.json({html,links});
+})
+
 export default app;
 
-// `/api/any` Routes will not require API Key
-// `/api/cruxx/any` Routes will require API Key
+// `/api/*` Routes will not require API Key
+// `/api/cruxx/*` Routes will require API Key
