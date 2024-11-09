@@ -18,6 +18,8 @@ export const summarize = async (url: string, env: CloudflareBindings) => {
   } catch (error) {
     throw error;
   }
+  console.log("-------------------------------------");
+  console.log("Summary:",url,summary,"\n");
   return summary;
 };
 

@@ -205,6 +205,79 @@ app.get(
   }
 );
 
+// app.get("/cruxx/summarize/all", zValidator("query",z.object({url : z.string()})),async c=>{
+//   const {url} = c.req.valid("query");
+//   let html;
+//   try {
+//     html = await getHTML(url);
+//   } catch (error) {
+//     console.log(error);
+//     return c.json({data: null, error: "Error fetching HTML from base URL"});
+//   }
+//   let refererLinks : TRefererLink[];
+//   refererLinks = scrapeHTML(html,url);
+//   const summary = await summarize(refererLinks[0].url,c.env);
+//   return c.json({summary});
+
+// })
+
+app.get("/cruxx/summarize/all", zValidator("query", z.object({ url: z.string() })), async c => {
+  const { url } = c.req.valid("query");
+  let html;
+  
+  try {
+    html = await getHTML(url);
+  } catch (error) {
+    console.log(error);
+    return c.json({ 
+      data: null, 
+      error: "Error fetching HTML from base URL",
+      totalLinks: 0,
+      successCount: 0
+    });
+  }
+
+  let refererLinks: TRefererLink[];
+  refererLinks = scrapeHTML(html, url);
+  const totalLinks = refererLinks.length;
+
+  try {
+    // Create an array of promises for all summaries
+    const summaryPromises = refererLinks.map(link => 
+      summarize(link.url, c.env)
+        .catch(error => {
+          console.error(`Error summarizing ${link.url}:`, error);
+          return null; // Return null for failed summaries
+        })
+    );
+
+    // Wait for all summaries to complete in parallel
+    const summaries = await Promise.all(summaryPromises);
+
+    // Filter out failed summaries and combine with URLs
+    const results = refererLinks
+      .map((link, index) => ({
+        url: link.url,
+        summary: summaries[index]
+      }))
+      .filter(result => result.summary !== null);
+
+    return c.json({ 
+      totalLinks,
+      successCount: results.length,
+      data: results,
+      error: null
+    });
+  } catch (error) {
+    console.error("Error in parallel summarization:", error);
+    return c.json({ 
+      data: null, 
+      error: "Error during parallel summarization",
+      totalLinks,
+      successCount: 0
+    });
+  }
+});
 export default app;
 
 // `/api/*` Routes will not require API Key
