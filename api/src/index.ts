@@ -9,35 +9,39 @@ import { bearerAuth } from "hono/bearer-auth";
 import { generateAPIKey, validateKey } from "../lib/api-key";
 import { getHTML, scrapeHTML } from "../lib/scrape";
 import { TRefererLink } from "../lib/types";
+import { summarize } from "../lib/ai";
 // import {sign,encode,decode} from "hono/jwt"
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 // app.use(prettyJSON());
 
-app.use("/cruxx/api/*",bearerAuth({
-  verifyToken(token, c) {
-    return validateKey(token,c);
-  },
-  invalidTokenMessage(c) {
-    return {
-      erorr : "Incorrect or Invalid API KEY",
-      message : "Please provide valid API KEY or generate a new API KEY"
-    }
-  },
-  noAuthenticationHeaderMessage(c){
-    return {
-      error : "Authorization Header Not Found",
-      message : "Authorization : Bearer <API_KEY>"
-    }
-  },
-  invalidAuthenticationHeaderMessage(c){
-    return {
-      error : "Invalid Auhentication Header",
-      message : "Authorization : Bearer <API_KEY>"
-    }
-  }
-}),)
+app.use(
+  "/cruxx/api/*",
+  bearerAuth({
+    verifyToken(token, c) {
+      return validateKey(token, c);
+    },
+    invalidTokenMessage(c) {
+      return {
+        erorr: "Incorrect or Invalid API KEY",
+        message: "Please provide valid API KEY or generate a new API KEY",
+      };
+    },
+    noAuthenticationHeaderMessage(c) {
+      return {
+        error: "Authorization Header Not Found",
+        message: "Authorization : Bearer <API_KEY>",
+      };
+    },
+    invalidAuthenticationHeaderMessage(c) {
+      return {
+        error: "Invalid Auhentication Header",
+        message: "Authorization : Bearer <API_KEY>",
+      };
+    },
+  })
+);
 
 app.get("/", (c) => {
   return c.json({ message: "Hello,World!" });
@@ -46,7 +50,6 @@ app.get("/", (c) => {
 app.get("/cruxx", (c) => {
   return c.json({ message: "Hello,World!" });
 });
-
 
 // Admin Routes
 app.get("/cruxx/users", async (c) => {
@@ -139,57 +142,68 @@ app.delete("/cruxx/users/:id", async (c) => {
   return c.json({ message: "User account deleted" });
 });
 
-
 // Generate API Key
 app.get(
-  '/cruxx/key',
+  "/cruxx/key",
   zValidator(
-    'query',
+    "query",
     z.object({
       userId: z.string(),
     })
   ),
   async (c) => {
-    const {userId} = c.req.valid('query');
+    const { userId } = c.req.valid("query");
     let apiKey;
     try {
-      apiKey = await generateAPIKey(userId,c);
+      apiKey = await generateAPIKey(userId, c);
     } catch (error) {
-      return c.json({error,message : "Error generating API key"});
+      return c.json({ error, message: "Error generating API key" });
     }
     return c.json(apiKey);
   }
-)
+);
 
-app.get("/cruxx/api/whoami",async c=>{
+app.get("/cruxx/api/whoami", async (c) => {
   const prisma = getPrisma(c.env.DATABASE_URL);
   const apiKey = c.req.header("Authorization")?.split(" ")[1];
   const data = await prisma.token.findFirst({
-    where : {
-      apiKey
+    where: {
+      apiKey,
     },
-    include : {
-      user : true
+    include: {
+      user: true,
+    },
+  });
+  return c.json({ data });
+});
+
+app.get(
+  "/cruxx/summarize",
+  zValidator("query", z.object({ url: z.string() })),
+  async (c) => {
+    const { url } = c.req.valid("query");
+    let html;
+    try {
+      html = await getHTML(url);
+    } catch (error) {
+      console.log("HTML Scrape Error", error);
+      return c.json({ error, message: "Error scrapping HTML from URL" });
     }
-  })
-  return c.json({data});
-})
-
-app.get("/cruxx/summarize", zValidator("query",z.object({url : z.string()})),async c=>{
-  const {url} = c.req.valid("query");
-  let html;
-  let links : TRefererLink[];
-  try {
-    html = await getHTML(url);
-  } catch (error) {
-    console.log("HTML Scrape Error",error);
-    return c.json({error,message : "Error scrapping HTML from URL"})
+    let summary;
+    try {
+      summary = await summarize(url, c.env);
+    } catch (error) {
+      return c.json({ data: null, url, error: "Error summarizing URL" });
+    }
+    return c.json({
+      data: {
+        url,
+        summary,
+      },
+      error: null,
+    });
   }
-  // console.log(html);
-
-  links = scrapeHTML(html,url)
-  return c.json({html,links});
-})
+);
 
 export default app;
 
