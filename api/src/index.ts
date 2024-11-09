@@ -11,7 +11,7 @@ import { generateAPIKey, validateKey } from "../lib/api-key";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
-app.use(prettyJSON());
+// app.use(prettyJSON());
 
 app.use("/cruxx/api/*",bearerAuth({
   verifyToken(token, c) {
@@ -37,9 +37,14 @@ app.use("/cruxx/api/*",bearerAuth({
   }
 }),)
 
-app.get("/", async (c) => {
+app.get("/", (c) => {
   return c.json({ message: "Hello,World!" });
 });
+
+app.get("/cruxx", (c) => {
+  return c.json({ message: "Hello,World!" });
+});
+
 
 // Admin Routes
 app.get("/cruxx/users", async (c) => {

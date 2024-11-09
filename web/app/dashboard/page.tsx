@@ -32,14 +32,12 @@ export default async function Page(){
       }),
 
     })
-    const response = await res.json();
-    console.log(response);
   }
 
   return (
     <div>
       <p>You are authenticated</p>
-      <pre>{JSON.stringify(response,null,2)}</pre>
+      <pre>{JSON.stringify(user,null,2)}</pre>
       {isAuth && <LogoutLink >Logout</LogoutLink>}
     </div>
   )
