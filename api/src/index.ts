@@ -10,12 +10,15 @@ import { generateAPIKey, validateKey } from "../lib/api-key";
 import { getHTML, scrapeHTML } from "../lib/scrape";
 import { TRefererLink } from "../lib/types";
 import { summarize } from "../lib/ai";
+import { cors } from "hono/cors";
 // import {sign,encode,decode} from "hono/jwt"
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 // app.use(prettyJSON());
 
+
+app.use(cors());
 app.use(
   "/cruxx/api/*",
   bearerAuth({

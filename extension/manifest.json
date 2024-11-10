@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Cruxx AI",
+  "version": "1.0.0",
+  "description": "Read smarter not longer",
+  "permissions": [
+    "tabs"
+  ],
+  "action": {
+    "default_popup": "./src/popup.html"
+  },
+  "background": {
+    "service_worker": "./src/background/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": ["./src/scripts/content-script.js"],
+      "matches": ["https://*/*"]
+    }
+  ]
+}
