@@ -6,7 +6,7 @@ Cruxx is AI summarizer package to make your reading experience better on the int
 ## Deliverables 
 1. Chrome Extension : Not published on chrome web store yet. Needs to be locally set up.
 2. Cruxx API : [Live API](https://api.danimahendra0904.workers.dev/cruxxx) that can be integrated with any project
-3. Demo Video : [https://dub.sh/cruxxai](https://dub.sh/cruxxai)
+3. Demo Video : [https://dub.sh/cruxx-demo](https://dub.sh/cruxx-demo)
 
 ## Team
 I developed this project solo!
