@@ -7,7 +7,7 @@ export const summarize = async (url: string, env: CloudflareBindings) => {
   try {
     const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-2.0-flash-001",
     systemInstruction: `You are a web content analyzer.Summarize the information provided in the HTML within 100-120 words only. The summary should be accurate, concise and easy-to-understand.`,
   });
   logProgress(url);
